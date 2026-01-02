@@ -1,7 +1,6 @@
-# BookCycle — Community Book Exchange & Giveaway Platform
+# BookCycle: Community Book Exchange & Giveaway Platform
 A community-first platform for exchanging and giving away books. Keep great stories in circulation while **reducing waste and promoting reading-powered recycling**. 📚♻️
-
-![BookCycle Landing Page](landing_page.jpg)
+<img src="landing_page.jpg" alt="BookCycle Landing Page" width="600">
 
 ---
 ## Index
