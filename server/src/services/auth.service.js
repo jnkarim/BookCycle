@@ -2,7 +2,9 @@ import { User } from "../models/User.js";
 import { signAuthToken } from "./token.service.js";
 import { OAuth2Client } from "google-auth-library";
 
-const GOOGLE_CLIENT_ID = (process.env.GOOGLE_CLIENT_ID || "").trim();
+import { config } from "../config/env.js";
+
+const GOOGLE_CLIENT_ID = (config.googleClientId || "").trim();
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 export async function registerUser({ firstName, lastName, email, password }) {
@@ -52,6 +54,12 @@ export async function loginWithGoogle({ idToken }) {
   if (!idToken) {
     const err = new Error("Missing idToken");
     err.status = 400;
+    throw err;
+  }
+
+  if (!GOOGLE_CLIENT_ID) {
+    const err = new Error("GOOGLE_CLIENT_ID is missing on the server");
+    err.status = 500;
     throw err;
   }
 

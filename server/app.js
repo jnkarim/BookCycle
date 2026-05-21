@@ -17,23 +17,32 @@ const app = express();
 
 /* ---------- Security & parsing ---------- */
 app.use(helmet());
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 
-/* ---------- CORS (allow exact origins only) ---------- */
+const configuredOrigins = (process.env.CLIENT_ORIGIN || "")
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/+$/, ""))
+  .filter(Boolean);
+
 const ALLOW = new Set([
-  "https://book-cycle-cxry.vercel.app", // production client
-  "http://localhost:5173",              // local dev client
+  ...configuredOrigins,
+  "http://localhost:5173",
+  "http://localhost:3000",
 ]);
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true; // server-to-server, curl, health checks
+  const clean = origin.replace(/\/+$/, "");
+  if (ALLOW.has(clean)) return true;
+
+  return /^https:\/\/book-cycle-[a-z0-9-]+\.vercel\.app$/i.test(clean);
+}
 
 app.use(
   cors({
     origin: (origin, cb) => {
-      // allow server-to-server/SSR/tools (no Origin header)
-      if (!origin) return cb(null, true);
-
-      const clean = origin.replace(/\/+$/, "");
-
-      return ALLOW.has(clean) ? cb(null, clean) : cb(new Error("CORS"));
+      if (isAllowedOrigin(origin)) return cb(null, true);
+      return cb(new Error(`CORS blocked origin: ${origin}`));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
